@@ -14,47 +14,60 @@ var features = {
     console: console
 };
 
-document.body.classList.add("loading");
-
 var inputElement;
 var input_dict = {};
 
-document.getElementById('file_upload').addEventListener('change', function (e) {
-    inputElement = event.target.files;
-    for (var i = 0; i < inputElement.length; i++) {
-        if (input_dict[inputElement[i].name] == undefined) {
-            var image_object = document.createElement("option");
-            var image_object_name = document.createTextNode(inputElement[i].name);
-            image_object.appendChild(image_object_name);
-            document.getElementById("file_list").appendChild(image_object);
+window.onload = function () {
+    document.body.classList.add("loading");
+
+    document.getElementById('file_upload').addEventListener('change', function (e) {
+        inputElement = event.target.files;
+        for (var i = 0; i < inputElement.length; i++) {
+            if (input_dict[inputElement[i].name] == undefined) {
+                var image_object = document.createElement("option");
+                var image_object_name = document.createTextNode(inputElement[i].name);
+                image_object.appendChild(image_object_name);
+                document.getElementById("file_list").appendChild(image_object);
+            }
+
+            var img = document.createElement("img");
+            img.src = URL.createObjectURL(inputElement[i]);
+            input_dict[inputElement[i].name] = img;
         }
 
-        var img = document.createElement("img");
-        img.src = URL.createObjectURL(inputElement[i]);
-        input_dict[inputElement[i].name] = img;
+        console.log(input_dict)
+    }, false);
+
+
+    document.getElementById('file_delete').onclick = function () {
+        var selected = document.getElementById("file_list");
+        delete input_dict[selected.value];
+        selected.remove(selected.selectedIndex);
+
+        console.log(input_dict);
     }
 
-    console.log(input_dict)
-}, false);
+    // document.getElementById('file_rename').onclick = function () {
+    //     var selected = document.getElementById(file_upload).find("option:selected");
+    //     console.log(selected);
+    // };
 
+    document.getElementById('download_button').onclick = function () {
+        this.href = document.getElementById("imageCanvas_modified").toDataURL();
+        this.download = "image.png";
+    };
 
-document.getElementById('file_delete').onclick = function () {
-    // var selected = $(file_upload).find("option:selected");
-    // console.log(selected);
-    console.log(input_dict)
-    // selected.remove();
-    // var selected_name = selected.text();
-    // input_dict[selected_name].remove();
 };
 
-import("../pkg/index.js").catch(console.error).then((wasm) => {
+
+import("../pkg/index.js").then(compiler => {
     document.getElementById('run').onclick = function () {
         this.disabled = true;
         // get coocoo code from input
         var code_in = document.getElementById("code_in").value;
 
         // code2wasm to compile coocoo into wasm
-        var buffer = wasm.code2wasm(code_in);
+        var buffer = compiler.code2wasm(code_in);
         // turn wasm into wat using wabt 
         var wasm_mod = new WebAssembly.Module(buffer);
         var module = wabt.readWasm(buffer, { readDebugNames: true });
@@ -70,12 +83,7 @@ import("../pkg/index.js").catch(console.error).then((wasm) => {
         const { main } = wasmInstance.exports;
         document.getElementById("code_result").value = main();
         console.log(main())
+    }
+}).catch(console.error);
 
-    };
-
-    document.getElementById('download_button').onclick = function () {
-        this.href = document.getElementById("imageCanvas_modified").toDataURL();
-        this.download = "image.png";
-    };
-});
 

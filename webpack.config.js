@@ -17,6 +17,9 @@ module.exports = {
     contentBase: dist,
   },
 
+  node: {
+    fs: 'empty'
+  },
   plugins: [
     new CopyPlugin([
       path.resolve(__dirname, "static")

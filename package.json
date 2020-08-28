@@ -1,6 +1,6 @@
 {
-  "author": "Cheng Su <you@example.com>",
-  "name": "coocoo_test",
+  "author": "Cheng Su <chengsu6561@gmail.com>",
+  "name": "coocoo",
   "version": "0.1.0",
   "scripts": {
     "build": "rimraf dist pkg && webpack",
@@ -18,12 +18,6 @@
     "webpack-dev-server": "^3.7.1"
   },
   "dependencies": {
-    "fs": "0.0.1-security",
-    "wabt": "^1.0.16"
-  },
-  "browser": {
-    "fs": false,
-    "path": false,
-    "os": false
+    "wabt": "^1.0.19"
   }
 }

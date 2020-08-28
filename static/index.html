@@ -3,14 +3,16 @@
 
 <head>
   <meta charset="utf-8">
-  <title>grayscale.js</title>
+  <title>filter.js</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css"
     integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
   <style type="text/css">
   </style>
+  <script src="index.js"></script>
 </head>
 
 <body>
+
   <div class="container">
     <div class="jumbotron">
       <h1>Image Grayscale</h1>
@@ -26,25 +28,23 @@
 
 
           <div class="form-group">
-            <select multiple class="form-control-plaintext col-sm-12" id="file_list" readonly width="300" height="300">
+            <select multiple class="form-control-plaintext col-sm-12" id="file_list">
             </select>
           </div>
 
 
           <div class="card-footer text-muted">
-            <form>
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">Upload</span>
-                </div>
-                <div class="custom-file">
-                  <input multiple type="file" class="custom-file-input" id="file_upload">
-                  <label class="custom-file-label" for="file_upload">Choose file</label>
-                </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Upload</span>
               </div>
-              <button class="btn btn-primary" id="file_rename">Rename</button>
-              <button class="btn btn-primary" id="file_delete">Delete</button>
-            </form>
+              <div class="custom-file">
+                <input multiple type="file" class="custom-file-input" id="file_upload">
+                <label class="custom-file-label" for="file_upload">Choose file</label>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="file_rename">Rename</button>
+            <button class="btn btn-primary" id="file_delete">Delete</button>
           </div>
         </div>
       </div>
@@ -119,10 +119,6 @@
     </div>
   </div>
   <div class="modal"></div>
-  <script src="index.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
-    integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4"
-    crossorigin="anonymous"></script>
 </body>
 
 </html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>grayscale.js</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css"
+    integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+  <style type="text/css">
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="jumbotron">
+      <h1>Image Grayscale</h1>
+      <p>This website uses OpenCVJS to turn Image into Grayscale.</p>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-header">
+            File Upload
+          </div>
+
+
+          <div class="form-group">
+            <select multiple class="form-control-plaintext col-sm-12" id="file_list" readonly width="300" height="300">
+            </select>
+          </div>
+
+
+          <div class="card-footer text-muted">
+            <form>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Upload</span>
+                </div>
+                <div class="custom-file">
+                  <input multiple type="file" class="custom-file-input" id="file_upload">
+                  <label class="custom-file-label" for="file_upload">Choose file</label>
+                </div>
+              </div>
+              <button class="btn btn-primary" id="file_rename">Rename</button>
+              <button class="btn btn-primary" id="file_delete">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-header">
+            Original Image
+          </div>
+          <div class="card-block text-center">
+            <canvas id="imageCanvas_original"></canvas>
+          </div>
+          <div class="card-footer text-muted">
+            <p class="card-text">.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-header">
+            Modified Image
+          </div>
+          <div class="card-block text-center">
+            <canvas id="imageCanvas_modified"></canvas>
+          </div>
+          <div class="card-footer">
+            <a class="btn btn-primary" href="#" id="download_button" class="card-link">Download Image</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-header">
+            Code Area
+          </div>
+          <div class="card-block text-center">
+            <textarea class="form-control" id="code_in" rows="10" style="min-width: 50%"></textarea>
+          </div>
+          <div class="card-footer text-muted">
+            <button type="button" id="run" class="btn btn-primary">Run</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-header">
+            WAT
+          </div>
+          <div class="card-block text-center">
+            <textarea class="form-control" id="code_out" rows="10" style="min-width: 50%"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-header">
+            Result
+          </div>
+          <div class="card-block text-center">
+            <textarea class="form-control" id="code_result" rows="10" style="min-width: 50%"></textarea>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+  <div class="modal"></div>
+  <script src="index.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
+    integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

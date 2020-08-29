@@ -33,7 +33,7 @@
           </div>
 
 
-          <div class="card-footer text-muted">
+          <div class="card-footer">
             <div class="input-group mb-3">
               <div class="input-group-prepend">
                 <span class="input-group-text">Upload</span>
@@ -43,8 +43,17 @@
                 <label class="custom-file-label" for="file_upload">Choose file</label>
               </div>
             </div>
-            <button class="btn btn-primary" id="file_rename">Rename</button>
-            <button class="btn btn-primary" id="file_delete">Delete</button>
+            <div>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="enter new name" id="file_new_name">
+                <div class="input-group-append">
+                  <button class="btn btn-primary" type="button" id="file_rename">Rename</button>
+                </div>
+              </div>
+
+
+              <button class="btn btn-primary" id="file_delete">Delete</button>
+            </div>
           </div>
         </div>
       </div>

@@ -24,39 +24,48 @@ window.onload = function () {
         inputElement = event.target.files;
         for (var i = 0; i < inputElement.length; i++) {
             if (input_dict[inputElement[i].name] == undefined) {
-                var image_object = document.createElement("option");
-                var image_object_name = document.createTextNode(inputElement[i].name);
-                image_object.appendChild(image_object_name);
-                document.getElementById("file_list").appendChild(image_object);
+                var image_option = document.createElement("option");
+                var image_option_name = document.createTextNode(inputElement[i].name);
+                image_option.appendChild(image_option_name);
+                document.getElementById("file_list").appendChild(image_option);
             }
 
             var img = document.createElement("img");
             img.src = URL.createObjectURL(inputElement[i]);
             input_dict[inputElement[i].name] = img;
         }
-
-        console.log(input_dict)
     }, false);
 
 
     document.getElementById('file_delete').onclick = function () {
-        var selected = document.getElementById("file_list");
-        delete input_dict[selected.value];
-        selected.remove(selected.selectedIndex);
-
-        console.log(input_dict);
+        var self = document.getElementById("file_list");
+        delete input_dict[self.value];
+        self.remove(self.selectedIndex);
     }
 
-    // document.getElementById('file_rename').onclick = function () {
-    //     var selected = document.getElementById(file_upload).find("option:selected");
-    //     console.log(selected);
-    // };
+    document.getElementById('file_rename').onclick = function () {
+        var self = document.getElementById("file_list");
+        var old_name = self.value;
+        var new_name = document.getElementById("file_new_name").value;
+
+        if (new_name in input_dict) {
+            window.alert("please enter another name for this image");
+        } else {
+            input_dict[new_name] = input_dict[old_name];
+            delete input_dict[old_name];
+
+            self.remove(self.selectedIndex);
+            var new_option = document.createElement("option");
+            var new_option_name = document.createTextNode(new_name);
+            new_option.appendChild(new_option_name);
+            self.appendChild(new_option);
+        }
+    };
 
     document.getElementById('download_button').onclick = function () {
         this.href = document.getElementById("imageCanvas_modified").toDataURL();
         this.download = "image.png";
     };
-
 };
 
 

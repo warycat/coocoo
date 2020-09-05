@@ -3,32 +3,6 @@ use crate::ast::*;
 
 grammar;
 
-Expr: Box<Expr> = {
-    Expr ExprBiOp Factor => Box::new(Expr::BiOp(<>)),
-    Factor,
-};
-
-ExprBiOp: BiOpcode = {
-    "+" => BiOpcode::Add,
-    "-" => BiOpcode::Sub,
-};
-
-Factor: Box<Expr> = {
-    Factor FactorBiOp Term => Box::new(Expr::BiOp(<>)),
-    Term,
-};
-
-FactorBiOp: BiOpcode = {
-    "*" => BiOpcode::Mul,
-    "/" => BiOpcode::Div,
-};
-
-Term: Box<Expr> = {
-    <name:Identifier> "(" <exprs:Comma<Expr>> ")" => Box::new(Expr::Call(name, exprs)),
-    Identifier => Box::new(Expr::Variable(<>)),
-    Number => Box::new(Expr::Number(<>)),
-    "(" <Expr> ")"
-};
 
 Number: f64 = {
     r"[-+]?[0-9]*\.?[0-9]*" => f64::from_str(<>).unwrap()
@@ -38,45 +12,45 @@ Identifier: String = {
     r"[a-zA-Z][a-zA-Z0-9]*" => String::from_str(<>).unwrap()
 }
 
-pub Program: Vec<Function> = 
-    <functions:Function*> => functions.into_iter().collect();
+Expr: Box<Expr> = {
+    Expr ExprOp Factor => Box::new(Expr::Op(<>)),
+    Factor,
+};
+
+ExprOp: Opcode = {
+    "+" => Opcode::Add,
+    "-" => Opcode::Sub,
+};
+
+Factor: Box<Expr> = {
+    Factor FactorOp Term => Box::new(Expr::Op(<>)),
+    Term,
+};
+
+FactorOp: Opcode = {
+    "*" => Opcode::Mul,
+    "/" => Opcode::Div,
+};
+
+Comma<E>: Vec<E> =
+    <v0:(<E> ",")*> <e1:E?> =>
+        v0.into_iter().chain(e1).collect();
+
+Term: Box<Expr> = {
+    <name:Identifier> "(" <exprs:Comma<Expr>> ")" => Box::new(Expr::Call(name, exprs)),
+    Identifier => Box::new(Expr::Variable(<>)),
+    Number => Box::new(Expr::Number(<>)),
+    "(" <Expr> ")"
+};
+
+Prototype: Prototype = {
+    "def" <name:Identifier> "(" <params:Comma<Identifier>> ")" => Prototype::new(name, params)
+};
 
 Function: Function = {
     <prototype:Prototype> "{" <expr:Expr> "}" => Function::new(prototype, expr)
 };
 
-Prototype: Prototype = {
-    "func" <name:Identifier> "(" <params:Comma<Identifier>> ")" => Prototype::new(name, params)
-};
+pub Program: Vec<Function> = 
+    <functions:Function*> => functions.into_iter().collect();
 
-Comma<E>: Vec<E> =
-    <v:(<E> ",")*> <e:E?> =>
-        v.into_iter().chain(e).collect();
-
-        
-// image_index_list: () = {
-//     Num => Box::new(Expr::Number(<>)) comma Num,
-//     index_type,
-// };
-
-// image_array: () = {
-//      "[" image_index_list "]",
-// };
-
-// image_name: String = {
-//     r"[[:alpha:]]\w*" => String::from_str(<>).unwrap()
-// }
-
-// image_type: () = {
-//     "Node" "{"
-//     "node_name" "=" identifier
-//     "image_name"image_name "=" String
-//     image_array
-//     "}"
-// }
-
-// // example:
-// // node1 = Node{
-// //   node_name = "hello"
-// //   image_name = "image1"
-// //}

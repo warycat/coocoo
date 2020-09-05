@@ -1,17 +1,9 @@
 mod ast;
-
-// use photon_rs::PhotonImage;
 use ast::Compile;
 use std::collections::HashMap;
+use walrus::FunctionId;
 use walrus::*;
 use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen(start)]
-pub fn main_js() -> Result<(), JsValue> {
-    #[cfg(debug_assertions)]
-    console_error_panic_hook::set_once();
-    Ok(())
-}
 
 #[macro_use]
 extern crate lalrpop_util;
@@ -29,10 +21,6 @@ extern "C" {
     fn log_many(a: &str, b: &str);
 }
 
-macro_rules! console_log {
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
-
 struct Compiler {
     module: Module,
     src: String,
@@ -40,7 +28,6 @@ struct Compiler {
 
 impl Compiler {
     fn new(src: String) -> Self {
-        // create a new walrus module
         let config = ModuleConfig::new();
         let module = Module::with_config(config);
         Compiler { module, src }

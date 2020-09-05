@@ -16,7 +16,7 @@ pub trait Compile {
 pub enum Expr {
     Number(f64),
     Variable(String),
-    BiOp(Box<Expr>, BiOpcode, Box<Expr>),
+    Op(Box<Expr>, Opcode, Box<Expr>),
     Call(String, Vec<Box<Expr>>),
     Error,
 }
@@ -26,7 +26,7 @@ impl Debug for Expr {
         match *self {
             Self::Number(n) => write!(fmt, "{:?}", n),
             Self::Variable(ref name) => write!(fmt, "{:?}", name),
-            Self::BiOp(ref l, op, ref r) => write!(fmt, "({:?} {:?} {:?})", l, op, r),
+            Self::Op(ref l, op, ref r) => write!(fmt, "({:?} {:?} {:?})", l, op, r),
             Self::Call(ref name, ref exprs) => write!(fmt, "{:?} {:?}", name, exprs),
             Self::Error => write!(fmt, "error"),
         }
@@ -45,7 +45,7 @@ impl Compile for Expr {
             Number(n) => {
                 builder.f64_const(n);
             }
-            BiOp(ref l, op, ref r) => {
+            Op(ref l, op, ref r) => {
                 l.compile(builder, local_ids, function_ids);
                 r.compile(builder, local_ids, function_ids);
                 op.compile(builder, local_ids, function_ids);
@@ -68,16 +68,16 @@ impl Compile for Expr {
 }
 
 #[derive(Copy, Clone)]
-pub enum BiOpcode {
+pub enum Opcode {
     Mul,
     Div,
     Add,
     Sub,
 }
 
-impl Debug for BiOpcode {
+impl Debug for Opcode {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
-        use self::BiOpcode::*;
+        use self::Opcode::*;
         match *self {
             Mul => write!(fmt, "*"),
             Div => write!(fmt, "/"),
@@ -87,14 +87,14 @@ impl Debug for BiOpcode {
     }
 }
 
-impl Compile for BiOpcode {
+impl Compile for Opcode {
     fn compile(
         &self,
         builder: &mut InstrSeqBuilder,
         local_ids: &HashMap<String, LocalId>,
         function_ids: &HashMap<String, FunctionId>,
     ) {
-        use self::BiOpcode::*;
+        use self::Opcode::*;
         match *self {
             Mul => builder.binop(BinaryOp::F64Mul),
             Div => builder.binop(BinaryOp::F64Div),

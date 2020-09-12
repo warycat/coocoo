@@ -73,7 +73,7 @@ window.onload = async function () {
 };
 
 
-import("../pkg/index.js").then(compiler => {
+import("../pkg/coocoo.js").then(compiler => {
     function print_wat(buffer) {
         var module = wabt.readWasm(buffer, { readDebugNames: true });
         module.generateNames();
@@ -100,7 +100,7 @@ import("../pkg/index.js").then(compiler => {
         var wasm_mod = new WebAssembly.Module(buffer);
 
         const module = await WebAssembly.instantiate(wasm_mod, coocooImportObject);
-        print_wat(buffer);
+        // print_wat(buffer);
     }
 }).catch(console.error);
 

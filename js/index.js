@@ -1,5 +1,4 @@
 var wabt = require("wabt")();
-// Module['dynamicLibraries'] = ['../pkg/coocoo_library/coocoo_library_bg.wasm'];
 
 var features = {
     exceptions: false,
@@ -18,7 +17,11 @@ var features = {
 var input_files;
 var input_images = {};
 
-window.onload = function () {
+var exports = {};
+
+const coocooImportObject = {};
+
+window.onload = async function () {
     document.body.classList.add("loading");
 
     document.getElementById('file_upload').addEventListener('change', function (e) {
@@ -71,16 +74,7 @@ window.onload = function () {
 
 
 import("../pkg/index.js").then(compiler => {
-    document.getElementById('run').onclick = function () {
-        this.disabled = true;
-        // get coocoo code from input
-        var code_in = document.getElementById("code_input").value;
-
-        // code2wasm to compile coocoo into wasm
-        var buffer = compiler.code2wasm(code_in);
-
-        // turn wasm into wat using wabt 
-        var wasm_mod = new WebAssembly.Module(buffer);
+    function print_wat(buffer) {
         var module = wabt.readWasm(buffer, { readDebugNames: true });
         module.generateNames();
         module.applyNames();
@@ -89,15 +83,27 @@ import("../pkg/index.js").then(compiler => {
             inlineExport: false
         });
 
-        // output wat to webpage
         document.getElementById("code_output").value = wat;
-        wasmInstance = new WebAssembly.Instance(wasm_mod, features);
-        main = wasmInstance.exports;
-        // document.getElementById("code_result").value = main();
+    }
 
-        console.log(wat)
-        console.log(main)
+    document.getElementById('run').onclick = async function () {
+        var code_in = document.getElementById("code_input").value;
+
+        var response = await fetch("coocoo_library_bg.wasm");
+        console.log(response)
+        // var wasm_buffer = (new Uint8Array(response.arrayBuffer())).toString();
+        var wasm_buffer = (new Uint8Array(response.arrayBuffer()));
+        console.log(wasm_buffer);
+        // wasm_buffer = Array.from(wasm_buffer);
+
+        buffer = compiler.code2wasm(code_in, wasm_buffer);
+        var wasm_mod = new WebAssembly.Module(buffer);
+
+        const module = await WebAssembly.instantiate(wasm_mod, coocooImportObject);
+        print_wat(buffer);
     }
 }).catch(console.error);
+
+
 
 

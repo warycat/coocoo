@@ -9,33 +9,57 @@ use wasm_bindgen::prelude::*;
 extern crate lalrpop_util;
 lalrpop_mod!(pub coocoo);
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+// #[wasm_bindgen]
+// extern "C" {
+//     #[wasm_bindgen(js_namespace = console)]
+//     fn log(s: &str);
 
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_u32(a: u32);
+//     #[wasm_bindgen(js_namespace = console, js_name = log)]
+//     fn log_u32(a: u32);
 
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_many(a: &str, b: &str);
-}
+//     #[wasm_bindgen(js_namespace = console, js_name = log)]
+//     fn log_many(a: &str, b: &str);
+// }
 
 struct Compiler {
     module: Module,
     src: String,
+    function_ids: HashMap<String, FunctionId>,
 }
 
 impl Compiler {
     fn new(src: String) -> Self {
         let config = ModuleConfig::new();
         let module = Module::with_config(config);
-        Compiler { module, src }
+        let function_ids = HashMap::new();
+        Compiler {
+            module,
+            src,
+            function_ids,
+        }
     }
 
-    fn compile(&mut self) -> Vec<u8> {
+    fn import_library_module(&mut self, wasm_buffer: Vec<u8>) {
+        let lib = match Module::from_buffer(&wasm_buffer) {
+            Ok(module) => module,
+            Err(_) => {
+                log("Module import error");
+                return;
+            }
+        };
+
+        for func in lib.funcs.iter() {
+            let func_name = func.name.as_ref().unwrap().to_string();
+            self.function_ids.insert(func_name, func.id());
+            let f_n = String::from(func.name.as_ref().unwrap().to_string());
+            log(&f_n);
+        }
+    }
+
+    fn compile(&mut self, wasm_buffer: Vec<u8>) -> Vec<u8> {
+        self.function_ids.clear();
+        self.import_library_module(wasm_buffer);
         let functions = coocoo::ProgramParser::new().parse(&self.src).unwrap();
-        let mut function_ids: HashMap<String, FunctionId> = HashMap::new();
         for function in functions {
             let s = format!("{:?}", function);
             let mut params: Vec<ValType> = vec![];
@@ -50,9 +74,10 @@ impl Compiler {
             let mut function_builder =
                 FunctionBuilder::new(&mut self.module.types, &params, &[ValType::F64]);
             let mut builder: InstrSeqBuilder = function_builder.func_body();
-            function.compile(&mut builder, &local_ids, &function_ids);
+            function.compile(&mut builder, &local_ids, &self.function_ids);
             let function_id = function_builder.finish(args, &mut self.module.funcs);
-            function_ids.insert(function.prototype.name.to_string(), function_id);
+            self.function_ids
+                .insert(function.prototype.name.to_string(), function_id);
             self.module
                 .exports
                 .add(&function.prototype.name, function_id);
@@ -63,9 +88,9 @@ impl Compiler {
 }
 
 #[wasm_bindgen]
-pub fn code2wasm(src: String) -> Vec<u8> {
+pub fn code2wasm(src: String, wasm_buffer: Vec<u8>) -> Vec<u8> {
     let mut compiler = Compiler::new(src);
-    compiler.compile()
+    compiler.compile(wasm_buffer)
 }
 
 // #[wasm_bindgen]

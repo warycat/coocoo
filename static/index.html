@@ -9,6 +9,7 @@
   <style type="text/css">
   </style>
   <script src="index.js"></script>
+  <link href="/favicon.ico" type="image/x-icon" rel="icon" />
 </head>
 
 <body>
@@ -94,7 +95,18 @@
             Code Area
           </div>
           <div class="card-block text-center">
-            <textarea class="form-control" id="code_input" rows="10" style="min-width: 50%"></textarea>
+            <textarea class="form-control" id="code_input" rows="10" style="min-width: 50%">
+func add(a, b) {
+  a + b
+}
+func minus(a, b) {
+  a - b
+}        
+func main() {
+  add(1, 2) * minus(7,6)
+}
+
+            </textarea>
           </div>
           <div class="card-footer text-muted">
             <button type="button" id="run" class="btn btn-primary">Run</button>

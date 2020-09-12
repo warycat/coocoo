@@ -44,7 +44,7 @@ Term: Box<Expr> = {
 };
 
 Prototype: Prototype = {
-    "def" <name:Identifier> "(" <params:Comma<Identifier>> ")" => Prototype::new(name, params)
+    "func" <name:Identifier> "(" <params:Comma<Identifier>> ")" => Prototype::new(name, params)
 };
 
 Function: Function = {

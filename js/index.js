@@ -87,20 +87,20 @@ import("../pkg/coocoo.js").then(compiler => {
     }
 
     document.getElementById('run').onclick = async function () {
-        var code_in = document.getElementById("code_input").value;
+        var code_input = document.getElementById("code_input").value;
 
         var response = await fetch("coocoo_library_bg.wasm");
-        console.log(response)
-        // var wasm_buffer = (new Uint8Array(response.arrayBuffer())).toString();
-        var wasm_buffer = (new Uint8Array(response.arrayBuffer()));
-        console.log(wasm_buffer);
-        // wasm_buffer = Array.from(wasm_buffer);
+        var library = await response.arrayBuffer();
+        var enc = new TextDecoder("utf-8");
+        library = enc.decode(library);
 
-        buffer = compiler.code2wasm(code_in, wasm_buffer);
-        var wasm_mod = new WebAssembly.Module(buffer);
+        output_buffer = compiler.code2wasm(code_input, library);
+        var wasm_mod = new WebAssembly.Module(output_buffer);
+        // const module = await WebAssembly.instantiate(wasm_mod);
 
-        const module = await WebAssembly.instantiate(wasm_mod, coocooImportObject);
-        // print_wat(buffer);
+
+        //----------show wat of compiled coocoo code---------
+        print_wat(output_buffer);
     }
 }).catch(console.error);
 

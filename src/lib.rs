@@ -23,42 +23,60 @@ extern "C" {
 
 struct Compiler {
     module: Module,
+    library: String,
     src: String,
     function_ids: HashMap<String, FunctionId>,
 }
 
 impl Compiler {
-    fn new(src: String) -> Self {
+    fn new(src: String, library: String) -> Self {
         let config = ModuleConfig::new();
         let module = Module::with_config(config);
         let function_ids = HashMap::new();
         Compiler {
             module,
+            library,
             src,
             function_ids,
         }
     }
 
-    fn import_library_module(&mut self, wasm_buffer: Vec<u8>) {
-        let lib = match Module::from_buffer(&wasm_buffer) {
+    fn import_library_module(&mut self) {
+        let library_u8 = self.library.as_bytes();
+        let mut library_module = match Module::from_buffer(library_u8) {
             Ok(module) => module,
             Err(_) => {
                 log("Module import error");
                 return;
             }
         };
+        library_module.name = Some("coocoo_library".to_string());
 
-        for func in lib.funcs.iter() {
-            let func_name = func.name.as_ref().unwrap().to_string();
-            self.function_ids.insert(func_name, func.id());
-            let f_n = String::from(func.name.as_ref().unwrap().to_string());
-            log(&f_n);
+        let lib_func_name_list = vec!["multiply", "minus"]; // remove
+        let mut lib_func_index: usize = 0; // remove
+
+        for func in library_module.funcs.iter() {
+            let lib_type_id = func.ty();
+            let lib_type_params_results = library_module.types.params_results(lib_type_id);
+            let func_type_id = self
+                .module
+                .types
+                .add(lib_type_params_results.0, lib_type_params_results.1);
+
+            // let func_name = func.name.as_ref().unwrap(); // name is empty
+            let func_name = lib_func_name_list[lib_func_index]; // remove
+            lib_func_index += 1; // remove
+
+            let (func_id, _) =
+                self.module
+                    .add_import_func("coocoo_library", func_name, func_type_id);
+            self.function_ids.insert(func_name.to_string(), func_id);
         }
     }
 
-    fn compile(&mut self, wasm_buffer: Vec<u8>) -> Vec<u8> {
+    fn compile(&mut self) -> Vec<u8> {
         self.function_ids.clear();
-        self.import_library_module(wasm_buffer);
+        self.import_library_module();
         let functions = coocoo::ProgramParser::new().parse(&self.src).unwrap();
         for function in functions {
             let s = format!("{:?}", function);
@@ -66,11 +84,12 @@ impl Compiler {
             let mut args: Vec<LocalId> = vec![];
             let mut local_ids: HashMap<String, LocalId> = HashMap::new();
             for param in &function.prototype.params {
-                params.push(ValType::F64);
+                params.push(ValType::F64); //(ValType::F64) change into other type in future
                 let id = self.module.locals.add(ValType::F64);
                 local_ids.insert(param.to_string(), id);
                 args.push(id);
             }
+
             let mut function_builder =
                 FunctionBuilder::new(&mut self.module.types, &params, &[ValType::F64]);
             let mut builder: InstrSeqBuilder = function_builder.func_body();
@@ -78,19 +97,20 @@ impl Compiler {
             let function_id = function_builder.finish(args, &mut self.module.funcs);
             self.function_ids
                 .insert(function.prototype.name.to_string(), function_id);
+
             self.module
                 .exports
                 .add(&function.prototype.name, function_id);
-            log(&s);
+            // log(&s);
         }
         self.module.emit_wasm()
     }
 }
 
 #[wasm_bindgen]
-pub fn code2wasm(src: String, wasm_buffer: Vec<u8>) -> Vec<u8> {
-    let mut compiler = Compiler::new(src);
-    compiler.compile(wasm_buffer)
+pub fn code2wasm(src: String, library: String) -> Vec<u8> {
+    let mut compiler = Compiler::new(src, library);
+    compiler.compile()
 }
 
 // #[wasm_bindgen]

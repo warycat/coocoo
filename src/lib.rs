@@ -47,8 +47,9 @@ impl Compiler {
         log(&self.library);
         let mut library_module = match Module::from_buffer(library_u8) {
             Ok(module) => module,
-            Err(_) => {
+            Err(e) => {
                 log("Module import error");
+                log(e.description());
                 return;
             }
         };

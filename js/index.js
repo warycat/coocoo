@@ -96,8 +96,8 @@ import("../pkg/coocoo.js").then(compiler => {
         // console.log(typeof library)//string
         output_buffer = compiler.code2wasm(code_input, library);
 
-        var wasm_mod = new WebAssembly.Module(output_buffer);
-        const module = await WebAssembly.instantiate(wasm_mod);
+        // var wasm_mod = new WebAssembly.Module(output_buffer);
+        // const module = await WebAssembly.instantiate(wasm_mod);
 
 
         //----------show wat of compiled coocoo code---------

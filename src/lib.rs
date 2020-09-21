@@ -24,13 +24,13 @@ extern "C" {
 
 struct Compiler {
     module: Module,
-    library: Vec<u8>,
+    library: String,
     src: String,
     function_ids: HashMap<String, FunctionId>,
 }
 
 impl Compiler {
-    fn new(src: String, library: Vec<u8>) -> Self {
+    fn new(src: String, library: String) -> Self {
         let config = ModuleConfig::new();
         let module = Module::with_config(config);
         let function_ids = HashMap::new();
@@ -43,17 +43,9 @@ impl Compiler {
     }
 
     fn import_library_module(&mut self) {
-        let bytes = vec![0x41, 0x42, 0x43];
-        let k = String::from_utf8(bytes).expect("Found invalid UTF-8");
-        log(&k);
-
-        // let library_u8 = self.library.as_bytes();
-        let s2 = self.library.clone();
-        let s1: &[u8] = &self.library.clone();
-        let s = String::from_utf8(s2).expect("Found invalid UTF-8");
-        log(&s);
-
-        let mut library_module = match Module::from_buffer(s1) {
+        let library_u8 = self.library.as_bytes();
+        log(&self.library);
+        let mut library_module = match Module::from_buffer(library_u8) {
             Ok(module) => module,
             Err(_) => {
                 log("Module import error");
@@ -61,8 +53,7 @@ impl Compiler {
             }
         };
 
-        // let mut library_module = match Module::from_file(Path::new("static/coocoo_library_bg.wasm"))
-        // {
+        // let mut library_module = match Module::from_file(Path::new("coocoo_library_bg.wasm")) {
         //     Ok(module) => module,
         //     Err(_) => {
         //         log("Module import error");
@@ -127,7 +118,7 @@ impl Compiler {
 }
 
 #[wasm_bindgen]
-pub fn code2wasm(src: String, library: Vec<u8>) -> Vec<u8> {
+pub fn code2wasm(src: String, library: String) -> Vec<u8> {
     let mut compiler = Compiler::new(src, library);
     compiler.compile()
 }

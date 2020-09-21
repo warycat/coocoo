@@ -1,6 +1,7 @@
 mod ast;
 use ast::Compile;
 use std::collections::HashMap;
+use std::path::Path;
 use walrus::FunctionId;
 use walrus::*;
 use wasm_bindgen::prelude::*;
@@ -23,13 +24,13 @@ extern "C" {
 
 struct Compiler {
     module: Module,
-    library: String,
+    library: Vec<u8>,
     src: String,
     function_ids: HashMap<String, FunctionId>,
 }
 
 impl Compiler {
-    fn new(src: String, library: String) -> Self {
+    fn new(src: String, library: Vec<u8>) -> Self {
         let config = ModuleConfig::new();
         let module = Module::with_config(config);
         let function_ids = HashMap::new();
@@ -42,14 +43,32 @@ impl Compiler {
     }
 
     fn import_library_module(&mut self) {
-        let library_u8 = self.library.as_bytes();
-        let mut library_module = match Module::from_buffer(library_u8) {
+        let bytes = vec![0x41, 0x42, 0x43];
+        let k = String::from_utf8(bytes).expect("Found invalid UTF-8");
+        log(&k);
+
+        // let library_u8 = self.library.as_bytes();
+        let s2 = self.library.clone();
+        let s1: &[u8] = &self.library.clone();
+        let s = String::from_utf8(s2).expect("Found invalid UTF-8");
+        log(&s);
+
+        let mut library_module = match Module::from_buffer(s1) {
             Ok(module) => module,
             Err(_) => {
                 log("Module import error");
                 return;
             }
         };
+
+        // let mut library_module = match Module::from_file(Path::new("static/coocoo_library_bg.wasm"))
+        // {
+        //     Ok(module) => module,
+        //     Err(_) => {
+        //         log("Module import error");
+        //         return;
+        //     }
+        // };
         library_module.name = Some("coocoo_library".to_string());
 
         let lib_func_name_list = vec!["multiply", "minus"]; // remove
@@ -77,38 +96,38 @@ impl Compiler {
     fn compile(&mut self) -> Vec<u8> {
         self.function_ids.clear();
         self.import_library_module();
-        let functions = coocoo::ProgramParser::new().parse(&self.src).unwrap();
-        for function in functions {
-            let s = format!("{:?}", function);
-            let mut params: Vec<ValType> = vec![];
-            let mut args: Vec<LocalId> = vec![];
-            let mut local_ids: HashMap<String, LocalId> = HashMap::new();
-            for param in &function.prototype.params {
-                params.push(ValType::F64); //(ValType::F64) change into other type in future
-                let id = self.module.locals.add(ValType::F64);
-                local_ids.insert(param.to_string(), id);
-                args.push(id);
-            }
+        // let functions = coocoo::ProgramParser::new().parse(&self.src).unwrap();
+        // for function in functions {
+        //     let s = format!("{:?}", function);
+        //     let mut params: Vec<ValType> = vec![];
+        //     let mut args: Vec<LocalId> = vec![];
+        //     let mut local_ids: HashMap<String, LocalId> = HashMap::new();
+        //     for param in &function.prototype.params {
+        //         params.push(ValType::F64); //(ValType::F64) change into other type in future
+        //         let id = self.module.locals.add(ValType::F64);
+        //         local_ids.insert(param.to_string(), id);
+        //         args.push(id);
+        //     }
 
-            let mut function_builder =
-                FunctionBuilder::new(&mut self.module.types, &params, &[ValType::F64]);
-            let mut builder: InstrSeqBuilder = function_builder.func_body();
-            function.compile(&mut builder, &local_ids, &self.function_ids);
-            let function_id = function_builder.finish(args, &mut self.module.funcs);
-            self.function_ids
-                .insert(function.prototype.name.to_string(), function_id);
+        //     let mut function_builder =
+        //         FunctionBuilder::new(&mut self.module.types, &params, &[ValType::F64]);
+        //     let mut builder: InstrSeqBuilder = function_builder.func_body();
+        //     function.compile(&mut builder, &local_ids, &self.function_ids);
+        //     let function_id = function_builder.finish(args, &mut self.module.funcs);
+        //     self.function_ids
+        //         .insert(function.prototype.name.to_string(), function_id);
 
-            self.module
-                .exports
-                .add(&function.prototype.name, function_id);
-            // log(&s);
-        }
+        //     self.module
+        //         .exports
+        //         .add(&function.prototype.name, function_id);
+        //     // log(&s);
+        // }
         self.module.emit_wasm()
     }
 }
 
 #[wasm_bindgen]
-pub fn code2wasm(src: String, library: String) -> Vec<u8> {
+pub fn code2wasm(src: String, library: Vec<u8>) -> Vec<u8> {
     let mut compiler = Compiler::new(src, library);
     compiler.compile()
 }
